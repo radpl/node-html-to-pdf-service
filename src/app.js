@@ -9,7 +9,7 @@ const port = process.env.PORT || 3001;
 
 app.use(cors());
 //app.use(express.json());
-app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.json({ limit: "20mb" }));
 
 app.get('/test', (req, res) => {
   res.json({
@@ -34,18 +34,21 @@ app.get('/generateTestPDF', async (req, res) => {
 });
 
 app.post('/generatePDF', async (req, res) => {
-  //console.log('generatePDF');
+  console.log('generatePDF');
   const html = req.body;
-  console.log(req.body);
+  //console.log(req.body);
   try {
     const browser = await puppeteer.launch({ headless: true });
+    console.log('html length', req.body.html.length);
     const page = await browser.newPage();
-    await page.setContent(html.html, { waitUntil: 'domcontentloaded' });
+    await page.setContent(req.body.html, { waitUntil: 'domcontentloaded' });
+    console.log('await page.setContent');
     const buffer = await page.pdf({
       format: 'A4',
       printBackground: true,
       margin: { top: "5px", right: "5px", bottom: "5px", left: "5px" }
     });
+    console.log('await page.pdf');
     await browser.close();
     res.set({ 'Content-Type': 'application/pdf' });
     res.send(buffer);
